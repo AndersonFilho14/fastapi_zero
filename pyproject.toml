@@ -37,7 +37,7 @@ addopts = "-p no:warnings"
 
 [tool.coverage.run]
 # Isso força o coverage a olhar para a pasta correta, independente de como foi importado
-source = ["fast_zero"]
+source = ["fastapi_zero"]
 omit = ["tests/*"]  # Garante que não vamos medir a cobertura dos próprios testes
 
 
@@ -45,6 +45,6 @@ omit = ["tests/*"]  # Garante que não vamos medir a cobertura dos próprios tes
 lint = 'ruff check'
 pre_format = 'ruff check --fix'
 format = 'ruff format'
-run = 'fastapi dev fast_zero/app.py'
+run = 'fastapi dev fastapi_zero/app.py'
 pre_test = 'task lint'
-test = 'pytest -s -x --cov=fast_zero -vv'
+test = 'pytest -s -x --cov=fastapi_zero -vv'
