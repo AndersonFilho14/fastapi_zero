@@ -36,7 +36,7 @@ def _mock_db_time(*, model=User, time=datetime.now()):
 
     event.listen(model, "before_insert", fake_time_hook)
 
-    yield time
+    yield time, model.updated_at
 
     event.remove(model, "before_insert", fake_time_hook)
 

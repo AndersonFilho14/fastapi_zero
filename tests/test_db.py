@@ -6,23 +6,23 @@ from fastapi_zero.models import User
 
 
 def test_create_user(session, mock_db_time):
-    with mock_db_time(model=User) as time:
+    with mock_db_time(model=User) as (creted_time, updated_time):
         new_user = User(
             username="testuser",
             email="testuser@example.com",
             password="securepassword",
         )
         session.add(new_user)
+        session.add(new_user)
         session.commit()
 
         user = session.scalar(select(User).where(User.username == "testuser"))
-
-        breakpoint()
 
     assert asdict(user) == {
         "id": 1,
         "username": "testuser",
         "email": "testuser@example.com",
         "password": "securepassword",
-        "created_at": time,
+        "created_at": creted_time,
+        "updated_at": updated_time,
     }
