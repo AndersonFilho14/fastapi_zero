@@ -13,7 +13,6 @@ def test_create_user(session, mock_db_time):
             password="securepassword",
         )
         session.add(new_user)
-        session.add(new_user)
         session.commit()
 
         user = session.scalar(select(User).where(User.username == "testuser"))

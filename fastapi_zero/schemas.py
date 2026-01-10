@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 
 class Message(BaseModel):
@@ -16,6 +16,8 @@ class UserPublic(BaseModel):
     username: str
     email: EmailStr
     id: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserList(BaseModel):
