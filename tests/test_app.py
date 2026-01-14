@@ -39,7 +39,6 @@ def test_read_users(client):
 
 
 def test_read_users_with_users(client, user):
-
     from fastapi_zero.schemas import UserPublic
 
     user_schema = UserPublic.model_validate(user).model_dump()
@@ -101,7 +100,6 @@ def test_delete_user_raise(client, user):
 
 
 def test_update_integrity_error(client, user):
-
     post_result = client.post(
         "/users/",
         json={
