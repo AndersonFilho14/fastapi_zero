@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from fastapi_zero.schemas import UserPublic
+
 
 def test_read_root(client):
     response = client.get("/")
@@ -31,19 +33,13 @@ def test_create_user(client):
     }
 
 
-def test_read_users(client):
-    response = client.get("/users/")
-
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {"users": []}
-
-
-def test_read_users_with_users(client, user):
-    from fastapi_zero.schemas import UserPublic
+def test_read_users(client, user, token):
 
     user_schema = UserPublic.model_validate(user).model_dump()
 
-    response = client.get("/users/")
+    response = client.get(
+        "/users/", headers={"Authorization": f"Bearer {token}"}
+    )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"users": [user_schema]}
@@ -58,9 +54,10 @@ def test_read_user(client, user):
     assert response.json() == UserPublic.model_validate(user).model_dump()
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        "/user/1",
+        f"/user/{user.id}",
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "username": "mock_update",
             "email": "mock_update@example.com",
@@ -75,33 +72,32 @@ def test_update_user(client, user):
     }
 
 
-def test_update_raise(client):
+def test_update_raise(client, token):
     response = client.put(
         "/user/0",
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "username": "mock_update",
             "email": "mock_update@example.com",
             "password": "mock_updatepassword",
         },
     )
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "Encontrei não patrão"}
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {"detail": "Não tem permissão pra isso cumpade"}
 
 
-def test_delete_user(client, user):
-    response = client.delete("/user/1")
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f"/user/{user.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == HTTPStatus.OK
 
 
-def test_delete_user_raise(client, user):
-    response = client.delete("/user/0")
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "Encontrei não patrão"}
-
-
-def test_update_integrity_error(client, user):
+def test_update_integrity_error(client, user, token):
     post_result = client.post(
         "/users/",
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "username": "fausto",
             "email": "fausto@example.com",
@@ -111,6 +107,7 @@ def test_update_integrity_error(client, user):
 
     response_update = client.put(
         f"/user/{user.id}",
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "username": "fausto",
             "email": "bob@example.com",
@@ -119,3 +116,17 @@ def test_update_integrity_error(client, user):
     )
 
     assert response_update.status_code == HTTPStatus.CONFLICT
+
+
+def test_get_token(client, user):
+
+    response = client.post(
+        "/token",
+        data={"username": user.email, "password": user.clean_password},
+    )
+
+    token = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert token["token_type"] == "Bearer"
+    assert "token_type" in token
