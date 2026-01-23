@@ -1,6 +1,6 @@
-import email
-from sqlalchemy import select
 from dataclasses import asdict
+
+from sqlalchemy import select
 
 from fastapi_zero.models import User
 

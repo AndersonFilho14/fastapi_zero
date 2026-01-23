@@ -12,15 +12,11 @@ from fastapi.security import OAuth2PasswordBearer
 
 from fastapi_zero.models import User
 from fastapi_zero.database import get_session
-
-
-SECRET_KEY = "123"
-ALGORITHM = "HS256"
-ACESS_TOKEN_EXPIRE_MINUTES = 30
+from fastapi_zero.settings import settings
 
 pwd_context = PasswordHash.recommended()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 def get_password_hash(password: str):
@@ -33,14 +29,13 @@ def verify_password(plain_password: str, hashed_password: str):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-
-    expire = datetime.now(tz=ZoneInfo("UTC")) + timedelta(
-        minutes=ACESS_TOKEN_EXPIRE_MINUTES
-    )
+    print(f"Acess token data: {settings.ACESS_TOKEN_EXPIRE_MINUTES}")
+    print(f"Type: {type(settings.ACESS_TOKEN_EXPIRE_MINUTES)}")
+    expire = datetime.now(tz=ZoneInfo("UTC")) + timedelta(minutes=settings.ACESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
 
-    encode_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encode_jwt = encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encode_jwt
 
 
@@ -55,10 +50,11 @@ def get_current_user(
     )
 
     try:
-        payload = decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        payload = decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email = payload.get("sub")
 
         if not email:
+            print("Não tem email no payload")
             raise credentials_exception
 
     except DecodeError:
@@ -67,6 +63,7 @@ def get_current_user(
     user = session.scalar(select(User).where(User.email == email))
 
     if not user:
+        print("Usuário não encontrado")
         raise credentials_exception
 
     return user

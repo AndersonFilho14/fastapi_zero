@@ -1,16 +1,15 @@
-from datetime import datetime
 from contextlib import contextmanager
+from datetime import datetime
 
 import pytest
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 
 from fastapi_zero.app import app
-from fastapi_zero.models import User
-from fastapi.testclient import TestClient
+from fastapi_zero.models import User, table_registry
 from fastapi_zero.database import get_session
-from fastapi_zero.models import table_registry
 from fastapi_zero.security import get_password_hash
 
 
@@ -84,7 +83,7 @@ def user(session: Session):
 @pytest.fixture
 def token(client, user):
     response = client.post(
-        "/token",
+        "/auth/token",
         data={"username": user.email, "password": user.clean_password},
     )
 
