@@ -20,6 +20,7 @@ def test_jwt():
     assert decoded["test"] == data["test"]
     assert "exp" in decoded
 
+
 @mark.asyncio
 async def test_get_current_user(session, token):
     # data = {"acess_token": token, "token_type": "Bearer"}

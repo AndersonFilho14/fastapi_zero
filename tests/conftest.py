@@ -4,16 +4,16 @@ from httpx import AsyncClient, ASGITransport
 
 import pytest
 import pytest_asyncio
-from sqlalchemy.orm import Session
+import factory
+from factory import Factory
 from sqlalchemy.pool import StaticPool
-from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from fastapi_zero.app import app
-from fastapi_zero.models import User, table_registry
 from fastapi_zero.database import get_session
 from fastapi_zero.security import get_password_hash
+from fastapi_zero.models import User, table_registry
 
 
 @pytest_asyncio.fixture
@@ -92,3 +92,12 @@ async def token(client, user):
     )
 
     return response.json()["acess_token"]
+
+
+class UserFactory(factory.Factory):
+    class Meta:
+        model = User
+
+    username = factory.Sequence(lambda n: f"test_user{n}")
+    email = factory.lazy_attribute(lambda obj: f"{obj.username}@test.com")
+    password = factory.lazy_attribute(lambda obj: f"{obj.username}_senha")

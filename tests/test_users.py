@@ -111,3 +111,17 @@ async def test_update_integrity_error(client, user, token):
     )
 
     assert response_update.status_code == HTTPStatus.CONFLICT
+
+
+@pytest.mark.asyncio
+async def test_update_user_with_wrong_user(client, user, token):
+    response = await client.put(
+        f"/users/{user.id + 1}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "mynewpassword",
+        },
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
