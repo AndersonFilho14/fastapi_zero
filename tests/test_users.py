@@ -90,7 +90,7 @@ async def test_delete_user(client, user, token):
 
 @pytest.mark.asyncio
 async def test_update_integrity_error(client, user, token):
-    client.post(
+    await client.post(
         "/users/",
         headers={"Authorization": f"Bearer {token}"},
         json={
@@ -100,7 +100,7 @@ async def test_update_integrity_error(client, user, token):
         },
     )
 
-    response_update = client.put(
+    response_update = await client.put(
         f"/users/{user.id}",
         headers={"Authorization": f"Bearer {token}"},
         json={

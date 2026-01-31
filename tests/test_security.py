@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from jwt import decode
+from pytest import mark
 
 from fastapi_zero.models import User
 from fastapi_zero.security import (
@@ -19,16 +20,17 @@ def test_jwt():
     assert decoded["test"] == data["test"]
     assert "exp" in decoded
 
-
-def test_get_current_user(session, token):
+@mark.asyncio
+async def test_get_current_user(session, token):
     # data = {"acess_token": token, "token_type": "Bearer"}
 
-    user = get_current_user(session=session, token=token)
+    user = await get_current_user(session=session, token=token)
     assert User is type(user)
 
 
-def test_jwt_invalids_token(client):
-    response = client.delete("/users/1", headers={"Authorization": "Bearer token-invalido"})
+@mark.asyncio
+async def test_jwt_invalids_token(client):
+    response = await client.delete("/users/1", headers={"Authorization": "Bearer token-invalido"})
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {"detail": "Não pode ser validado esse token chefia"}
