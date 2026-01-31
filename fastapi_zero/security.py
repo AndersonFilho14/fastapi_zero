@@ -4,9 +4,9 @@ from pwdlib import PasswordHash
 from datetime import datetime, timedelta
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException
 from jwt import encode, decode, DecodeError
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordBearer
 
 
@@ -29,8 +29,6 @@ def verify_password(plain_password: str, hashed_password: str):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    print(f"Acess token data: {settings.ACESS_TOKEN_EXPIRE_MINUTES}")
-    print(f"Type: {type(settings.ACESS_TOKEN_EXPIRE_MINUTES)}")
     expire = datetime.now(tz=ZoneInfo("UTC")) + timedelta(minutes=settings.ACESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
@@ -39,8 +37,8 @@ def create_access_token(data: dict):
     return encode_jwt
 
 
-def get_current_user(
-    session: Session = Depends(get_session),
+async def get_current_user(
+    session: AsyncSession = Depends(get_session),
     token: str = Depends(oauth2_scheme),
 ) -> User:
     credentials_exception = HTTPException(
@@ -60,7 +58,7 @@ def get_current_user(
     except DecodeError:
         raise credentials_exception
 
-    user = session.scalar(select(User).where(User.email == email))
+    user = await session.scalar(select(User).where(User.email == email))
 
     if not user:
         print("Usuário não encontrado")
