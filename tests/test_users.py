@@ -114,9 +114,9 @@ async def test_update_integrity_error(client, user, token):
 
 
 @pytest.mark.asyncio
-async def test_update_user_with_wrong_user(client, user, token):
+async def test_update_user_with_wrong_user(client, token, other_user):
     response = await client.put(
-        f"/users/{user.id + 1}",
+        f"/users/{other_user.id}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "username": "bob",

@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from httpx import AsyncClient, ASGITransport
 
 import pytest
-import pytest_asyncio
 import factory
+import pytest_asyncio
 from factory import Factory
 from sqlalchemy.pool import StaticPool
 from sqlalchemy import create_engine, event
@@ -69,11 +69,22 @@ def mock_db_time():
 async def user(session: AsyncSession):
     clean_password = "testtest"
 
-    user = User(
-        username="Teste",
-        email="teste@test.com",
-        password=get_password_hash(clean_password),
-    )
+    user = UserFactory(password=get_password_hash(clean_password))
+
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    user.clean_password = clean_password
+
+    return user
+
+
+@pytest_asyncio.fixture
+async def other_user(session: AsyncSession):
+    clean_password = "testtest"
+
+    user = UserFactory(password=get_password_hash(clean_password))
 
     session.add(user)
     await session.commit()
