@@ -23,7 +23,7 @@ def test_jwt():
 
 @mark.asyncio
 async def test_get_current_user(session, token):
-    # data = {"acess_token": token, "token_type": "Bearer"}
+    # data = {"access_token": token, "token_type": "Bearer"}
 
     user = await get_current_user(session=session, token=token)
     assert User is type(user)

@@ -89,24 +89,14 @@ async def test_delete_user(client, user, token):
 
 
 @pytest.mark.asyncio
-async def test_update_integrity_error(client, user, token):
-    await client.post(
-        "/users/",
-        headers={"Authorization": f"Bearer {token}"},
-        json={
-            "username": "fausto",
-            "email": "fausto@example.com",
-            "password": "secret",
-        },
-    )
-
+async def test_update_integrity_error(client, user, other_user, token):
     response_update = await client.put(
         f"/users/{user.id}",
         headers={"Authorization": f"Bearer {token}"},
         json={
-            "username": "fausto",
-            "email": "bob@example.com",
-            "password": "mynewpassword",
+            "username": other_user.username,
+            "email": other_user.email,
+            "password": other_user.clean_password,
         },
     )
 
@@ -114,9 +104,9 @@ async def test_update_integrity_error(client, user, token):
 
 
 @pytest.mark.asyncio
-async def test_update_user_with_wrong_user(client, user, token):
+async def test_update_user_with_wrong_user(client, other_user, token):
     response = await client.put(
-        f"/users/{user.id + 1}",
+        f"/users/{other_user.id}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "username": "bob",
@@ -125,3 +115,13 @@ async def test_update_user_with_wrong_user(client, user, token):
         },
     )
     assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+@pytest.mark.asyncio
+async def test_delete_user_wrong_user(client, other_user, token):
+    response = await client.delete(
+        f"/users/{other_user.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {"detail": "Not enough permissions"}

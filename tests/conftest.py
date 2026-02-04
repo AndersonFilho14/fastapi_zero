@@ -69,9 +69,24 @@ def mock_db_time():
 async def user(session: AsyncSession):
     clean_password = "testtest"
 
-    user = User(
-        username="Teste",
-        email="teste@test.com",
+    user = UserFactory(
+        password=get_password_hash(clean_password),
+    )
+
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    user.clean_password = clean_password
+
+    return user
+
+
+@pytest_asyncio.fixture
+async def other_user(session: AsyncSession):
+    clean_password = "testtest"
+
+    user = UserFactory(
         password=get_password_hash(clean_password),
     )
 
@@ -91,7 +106,7 @@ async def token(client, user):
         data={"username": user.email, "password": user.clean_password},
     )
 
-    return response.json()["acess_token"]
+    return response.json()["access_token"]
 
 
 class UserFactory(factory.Factory):

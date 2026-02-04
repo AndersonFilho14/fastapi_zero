@@ -6,9 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from fastapi_zero.models import User
+from fastapi_zero.schemas import Token
 from fastapi_zero.database import get_session
 from fastapi_zero.security import (
     verify_password,
+    get_current_user,
     create_access_token,
 )
 
@@ -30,6 +32,12 @@ async def login_for_access_token(
             detail="Email ou senha incorretos",
         )
 
-    acess_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email})
 
-    return {"acess_token": acess_token, "token_type": "Bearer"}
+    return {"access_token": access_token, "token_type": "Bearer"}
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_access_token(current_user: User = Depends(get_current_user)):
+    access_token = create_access_token(data={"sub": current_user.email})
+    return {"access_token": access_token, "token_type": "Bearer"}
