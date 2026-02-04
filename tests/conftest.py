@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from httpx import AsyncClient, ASGITransport
 
 import pytest
-import pytest_asyncio
 import factory
+import pytest_asyncio
 from factory import Factory
 from sqlalchemy.pool import StaticPool
 from sqlalchemy import create_engine, event

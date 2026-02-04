@@ -61,6 +61,10 @@ async def get_current_user(
         credentials_exception.detail = "Venceu o token patrão"
         raise credentials_exception
 
+    except ExpiredSignatureError:
+        raise credentials_exception
+
+
     user = await session.scalar(select(User).where(User.email == email))
 
     if not user:
