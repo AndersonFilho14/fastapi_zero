@@ -1,6 +1,7 @@
 from typing import List
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
+from fastapi_zero.settings import ToDoState
 
 class Message(BaseModel):
     message: str
@@ -36,3 +37,9 @@ class Token(BaseModel):
 class FilterPage(BaseModel):
     limit: int = Field(ge=1, default=10)
     offset: int = Field(ge=0, default=0)
+
+
+class ToDoSchema(BaseModel):
+    name: str
+    description: str
+    state: ToDoState

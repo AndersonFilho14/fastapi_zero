@@ -4,13 +4,13 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
 from fastapi_zero.schemas import Message
-from fastapi_zero.routers import auth, users
+from fastapi_zero.routers import auth, users, to_do
 
 
 app = FastAPI(title="Minha Pomba")
 app.include_router(auth.router)
 app.include_router(users.router)
-
+app.include_router(to_do.router)
 
 @app.post("/star_db", status_code=HTTPStatus.OK)
 def start_db():
