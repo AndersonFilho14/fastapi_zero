@@ -64,7 +64,6 @@ async def get_current_user(
     except ExpiredSignatureError:
         raise credentials_exception
 
-
     user = await session.scalar(select(User).where(User.email == email))
 
     if not user:

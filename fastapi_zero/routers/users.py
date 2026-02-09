@@ -51,7 +51,6 @@ async def read_users(
     current_user=Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-
     users = await session.scalars(select(User).limit(limit=filter_users.limit).offset(offset=filter_users.offset))
     return {"users": users}
 
@@ -73,7 +72,6 @@ async def update_user(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-
     if not current_user.id == user_id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
@@ -103,7 +101,6 @@ async def delete_user(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-
     if current_user.id != user_id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,

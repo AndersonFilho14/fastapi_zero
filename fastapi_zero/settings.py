@@ -18,11 +18,11 @@ class Settings(BaseSettings):
 
 
 class ToDoState(str, Enum):
-    draft = 'draft'
-    todo = 'todo'
-    doing = 'doing'
-    done = 'done'
-    trash = 'trash'
+    draft = "draft"
+    todo = "todo"
+    doing = "doing"
+    done = "done"
+    trash = "trash"
 
 
 settings = Settings()

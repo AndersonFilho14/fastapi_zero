@@ -7,7 +7,6 @@ from freezegun import freeze_time
 
 @pytest.mark.asyncio
 async def test_get_token(client, user) -> None:
-
     response = await client.post(
         "/auth/token",
         data={"username": user.email, "password": user.clean_password},

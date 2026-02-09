@@ -25,7 +25,6 @@ async def test_create_user(client):
 
 @pytest.mark.asyncio
 async def test_read_users(client, user, token):
-
     user_schema = UserPublic.model_validate(user).model_dump()
 
     response = await client.get("/users/", headers={"Authorization": f"Bearer {token}"})

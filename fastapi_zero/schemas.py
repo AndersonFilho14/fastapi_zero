@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 from fastapi_zero.settings import ToDoState
 
+
 class Message(BaseModel):
     message: str
 
@@ -40,6 +41,13 @@ class FilterPage(BaseModel):
 
 
 class ToDoSchema(BaseModel):
-    name: str
+    title: str
+    description: str
+    state: ToDoState = Field(default=ToDoState.todo)
+
+
+class ToDoResponse(BaseModel):
+    id: int
+    title: str
     description: str
     state: ToDoState

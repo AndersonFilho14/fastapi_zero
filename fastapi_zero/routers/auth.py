@@ -23,7 +23,6 @@ async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: AsyncSession = Depends(get_session),
 ):
-
     user = await session.scalar(select(User).where(User.email == form_data.username))
 
     if not user or not verify_password(plain_password=form_data.password, hashed_password=user.password):
