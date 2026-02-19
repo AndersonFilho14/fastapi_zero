@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import func, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, registry
+from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
 from fastapi_zero.schemas import ToDoState
 
@@ -18,6 +18,8 @@ class User:
     password: Mapped[str] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(init=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
+
+    to_dos: Mapped[list["ToDo"]] = relationship(init=False, cascade="all, delete-orphan", lazy="selectin")
 
 
 @table_registry.mapped_as_dataclass

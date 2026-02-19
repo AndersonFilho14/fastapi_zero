@@ -1,4 +1,5 @@
 from typing import List
+
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 from fastapi_zero.settings import ToDoState
@@ -46,8 +47,15 @@ class ToDoSchema(BaseModel):
     state: ToDoState = Field(default=ToDoState.todo)
 
 
-class ToDoResponse(BaseModel):
+class ToDoResponse(ToDoSchema):
     id: int
-    title: str
-    description: str
-    state: ToDoState
+
+
+class FilterToDo(FilterPage):
+    title: str | None = Field(default=None, min_length=3, max_length=20)
+    description: str | None = None
+    state: ToDoState | None = None
+
+
+class ToDoListResponse(BaseModel):
+    to_dos: List[ToDoResponse]
