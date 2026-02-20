@@ -2,13 +2,13 @@ from http import HTTPStatus
 from typing import Annotated
 
 from sqlalchemy import select
-from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Query, HTTPException
 
 from fastapi_zero.models import User, ToDo
 from fastapi_zero.database import get_session
 from fastapi_zero.security import get_current_user
-from fastapi_zero.schemas import ToDoSchema, ToDoResponse, FilterToDo, ToDoListResponse
+from fastapi_zero.schemas import ToDoSchema, ToDoResponse, FilterToDo, ToDoListResponse, Message
 
 router = APIRouter(prefix="/to_dos", tags=["to_do"])
 
@@ -45,3 +45,19 @@ async def list_to_dos(
     result = await session.scalars(query.limit(to_dos_filter.limit).offset(to_dos_filter.offset))
 
     return {"to_dos": result.all()}
+
+
+@router.delete("/{to_do_id}", status_code=HTTPStatus.OK, response_model=Message)
+async def delete_to_do(
+    to_do_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    result = await session.scalar(select(ToDo).where(ToDo.id == to_do_id, current_user.id == ToDo.user_id))
+
+    if not result:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Achou essa tarefa não cumpade")
+
+    await session.delete(result)
+
+    return Message(message="Tarefa deletada com sucesso chefia")
