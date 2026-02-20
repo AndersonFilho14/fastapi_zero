@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import func, ForeignKey
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
 from fastapi_zero.schemas import ToDoState
@@ -30,5 +30,8 @@ class ToDo:
     title: Mapped[str]
     description: Mapped[str]
     state: Mapped[ToDoState]
+
+    created_at: Mapped[datetime] = mapped_column(init=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

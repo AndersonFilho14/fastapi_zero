@@ -1,7 +1,4 @@
-from http import HTTPStatus
-
 from pytest import mark
-from fastapi_zero.schemas import UserPublic
 
 
 @mark.asyncio

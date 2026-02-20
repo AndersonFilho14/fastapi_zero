@@ -1,19 +1,18 @@
-from datetime import datetime
 from contextlib import contextmanager
-from httpx import AsyncClient, ASGITransport
+from datetime import datetime
 
-import pytest
 import factory
+import pytest
 import pytest_asyncio
-from factory import Factory
-from sqlalchemy.pool import StaticPool
-from sqlalchemy import create_engine, event
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 from fastapi_zero.app import app
 from fastapi_zero.database import get_session
-from fastapi_zero.security import get_password_hash
 from fastapi_zero.models import User, table_registry
+from fastapi_zero.security import get_password_hash
 
 
 @pytest_asyncio.fixture

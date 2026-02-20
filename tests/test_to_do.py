@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-import pytest
 import factory
 import factory.fuzzy
+import pytest
 
 from fastapi_zero.models import ToDo, ToDoState
 
@@ -18,6 +18,7 @@ async def test_create_to_do(client, token):
             "state": "draft",
         },
     )
+    breakpoint()
     assert response.json() == {
         "id": 1,
         "title": "Test todo",
@@ -123,6 +124,43 @@ async def test_delete_to_do_success(session, user, client, token):
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"message": "Tarefa deletada com sucesso chefia"}
+
+
+@pytest.mark.asyncio
+async def test_update_to_do_failure(client, token):
+    response = await client.patch(
+        "/to_dos/10",
+        headers={"Authorization": f"Bearer {token}"},
+        json={},
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json()["detail"] == "Achou essa tarefa não"
+
+
+@pytest.mark.asyncio
+async def test_update_to_do_success(client, token, session, user):
+    to_do = ToDoFactory(user_id=user.id)
+    session.add(to_do)
+    await session.commit()
+    await session.refresh(to_do)
+    breakpoint()
+    data = {
+        "title": "mock title",
+        "description": "mock desc",
+        "state": "doing",
+    }
+
+    response = await client.patch(
+        f"/to_dos/{to_do.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json=data,
+    )
+
+    data["id"] = to_do.id
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == data
 
 
 class ToDoFactory(factory.Factory):

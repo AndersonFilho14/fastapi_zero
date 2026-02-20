@@ -1,6 +1,7 @@
 from typing import List
+from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from fastapi_zero.settings import ToDoState
 
@@ -45,7 +46,8 @@ class ToDoSchema(BaseModel):
     title: str
     description: str
     state: ToDoState = Field(default=ToDoState.todo)
-
+    created_at: datetime
+    updated_at: datetime
 
 class ToDoResponse(ToDoSchema):
     id: int
@@ -59,3 +61,9 @@ class FilterToDo(FilterPage):
 
 class ToDoListResponse(BaseModel):
     to_dos: List[ToDoResponse]
+
+
+class ToDoUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    state: ToDoState | None = None

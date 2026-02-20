@@ -1,14 +1,14 @@
 from http import HTTPStatus
 from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, Query, HTTPException
 
-from fastapi_zero.models import User, ToDo
 from fastapi_zero.database import get_session
+from fastapi_zero.models import ToDo, User
+from fastapi_zero.schemas import FilterToDo, Message, ToDoListResponse, ToDoResponse, ToDoSchema, ToDoUpdate
 from fastapi_zero.security import get_current_user
-from fastapi_zero.schemas import ToDoSchema, ToDoResponse, FilterToDo, ToDoListResponse, Message
 
 router = APIRouter(prefix="/to_dos", tags=["to_do"])
 
@@ -61,3 +61,26 @@ async def delete_to_do(
     await session.delete(result)
 
     return Message(message="Tarefa deletada com sucesso chefia")
+
+
+@router.patch("/{to_do_id}", status_code=HTTPStatus.OK, response_model=ToDoResponse)
+async def patch_to_do(
+    to_do_id: int,
+    to_do: ToDoUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    
+    db_to_do = await session.scalar(select(ToDo).filter(ToDo.user_id == current_user.id, ToDo.id == to_do_id))
+
+    if not db_to_do:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Achou essa tarefa não")
+
+    for key, value in to_do.model_dump(exclude_unset=True).items():
+        setattr(db_to_do, key, value)
+
+    session.add(db_to_do)
+    await session.commit()
+    await session.refresh(db_to_do)
+
+    return db_to_do

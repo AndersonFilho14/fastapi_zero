@@ -5,9 +5,9 @@ from pytest import mark
 
 from fastapi_zero.models import User
 from fastapi_zero.security import (
-    settings,
     create_access_token,
     get_current_user,
+    settings,
 )
 
 
