@@ -46,11 +46,12 @@ class ToDoSchema(BaseModel):
     title: str
     description: str
     state: ToDoState = Field(default=ToDoState.todo)
-    created_at: datetime
-    updated_at: datetime
+
 
 class ToDoResponse(ToDoSchema):
     id: int
+    created_at: datetime
+    updated_at: datetime
 
 
 class FilterToDo(FilterPage):

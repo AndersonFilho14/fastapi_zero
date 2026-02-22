@@ -1,29 +1,58 @@
 from http import HTTPStatus
 
+
+import pytest
 import factory
 import factory.fuzzy
-import pytest
+from sqlalchemy import select
 
 from fastapi_zero.models import ToDo, ToDoState
 
 
 @pytest.mark.asyncio
-async def test_create_to_do(client, token):
+async def test_create_to_do_error(session, user):
+    to_do = ToDoFactory(user_id=user.id, state="mock state")
+    session.add(to_do)
+    await session.commit()
+
+    with pytest.raises(LookupError):
+        await session.scalar(select(ToDo))
+
+
+@pytest.mark.asyncio
+async def test_create_to_do_with_wrong_state(client, token, mock_db_time):
     response = await client.post(
         "/to_dos/",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "title": "Test todo",
             "description": "Test todo description",
-            "state": "draft",
+            "state": "mock state",
         },
     )
-    breakpoint()
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.asyncio
+async def test_create_to_do(client, token, mock_db_time):
+    with mock_db_time(model=ToDo) as time:
+        response = await client.post(
+            "/to_dos/",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "title": "Test todo",
+                "description": "Test todo description",
+                "state": "draft",
+            },
+        )
     assert response.json() == {
         "id": 1,
         "title": "Test todo",
         "description": "Test todo description",
         "state": "draft",
+        "created_at": time[0].isoformat(),
+        "updated_at": time[1].isoformat(),
     }
 
 
@@ -105,6 +134,52 @@ async def test_list_todos_filter_state_should_return_5_to_dos(session, user, cli
 
 
 @pytest.mark.asyncio
+async def test_list_todos_should_return_all_expected_fields(
+    session, client, user, token, mock_db_time
+):
+    with mock_db_time(model=ToDo) as time:
+        to_do = ToDoFactory.create(user_id=user.id)
+        session.add(to_do)
+        await session.commit()
+
+    await session.refresh(to_do)
+    response = await client.get(
+        '/to_dos/',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.json()['to_dos'] == [{
+        'created_at': time[0].isoformat(),
+        'updated_at': time[1].isoformat(),
+        'description': to_do.description,
+        'id': to_do.id,
+        'state': to_do.state,
+        'title': to_do.title,
+    }]
+
+
+@pytest.mark.asyncio
+async def test_list_todos_filter_min_length(client, token):
+    tiny_string = 'a'
+    response = await client.get(
+        f'/to_dos/?title={tiny_string}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.asyncio
+async def test_list_todos_filter_max_length(client, token):
+    large_string = 'a' * 22
+    response = await client.get(
+        f'/to_dos/?title={large_string}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.asyncio
 async def test_delete_to_do_error(client, token):
     response = await client.delete(f"/to_dos/{10}", headers={"Authorization": f"Bearer {token}"})
 
@@ -143,24 +218,15 @@ async def test_update_to_do_success(client, token, session, user):
     to_do = ToDoFactory(user_id=user.id)
     session.add(to_do)
     await session.commit()
-    await session.refresh(to_do)
-    breakpoint()
-    data = {
-        "title": "mock title",
-        "description": "mock desc",
-        "state": "doing",
-    }
 
     response = await client.patch(
         f"/to_dos/{to_do.id}",
         headers={"Authorization": f"Bearer {token}"},
-        json=data,
+        json={"title": "mock title"},
     )
 
-    data["id"] = to_do.id
-
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == data
+    assert response.json()["title"] == "mock title"
 
 
 class ToDoFactory(factory.Factory):

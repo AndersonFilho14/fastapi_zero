@@ -70,7 +70,7 @@ async def patch_to_do(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    
+
     db_to_do = await session.scalar(select(ToDo).filter(ToDo.user_id == current_user.id, ToDo.id == to_do_id))
 
     if not db_to_do:
