@@ -55,7 +55,7 @@ async def read_users(
 
 
 @router.get("/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublic)
-async def read_user(user_id, session: AsyncSession = Depends(get_session)):
+async def read_user(user_id: int, session: AsyncSession = Depends(get_session)):
     user_db = await session.scalar(select(User).where(User.id == user_id))
 
     if not user_db:

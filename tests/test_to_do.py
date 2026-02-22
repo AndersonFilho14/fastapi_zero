@@ -6,6 +6,7 @@ import factory
 import factory.fuzzy
 from sqlalchemy import select
 
+from sqlalchemy.exc import DataError
 from fastapi_zero.models import ToDo, ToDoState
 
 
@@ -13,9 +14,9 @@ from fastapi_zero.models import ToDo, ToDoState
 async def test_create_to_do_error(session, user):
     to_do = ToDoFactory(user_id=user.id, state="mock state")
     session.add(to_do)
-    await session.commit()
 
-    with pytest.raises(LookupError):
+    with pytest.raises((LookupError, DataError)):
+        await session.commit()
         await session.scalar(select(ToDo))
 
 
@@ -134,9 +135,7 @@ async def test_list_todos_filter_state_should_return_5_to_dos(session, user, cli
 
 
 @pytest.mark.asyncio
-async def test_list_todos_should_return_all_expected_fields(
-    session, client, user, token, mock_db_time
-):
+async def test_list_todos_should_return_all_expected_fields(session, client, user, token, mock_db_time):
     with mock_db_time(model=ToDo) as time:
         to_do = ToDoFactory.create(user_id=user.id)
         session.add(to_do)
@@ -144,25 +143,27 @@ async def test_list_todos_should_return_all_expected_fields(
 
     await session.refresh(to_do)
     response = await client.get(
-        '/to_dos/',
-        headers={'Authorization': f'Bearer {token}'},
+        "/to_dos/",
+        headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.json()['to_dos'] == [{
-        'created_at': time[0].isoformat(),
-        'updated_at': time[1].isoformat(),
-        'description': to_do.description,
-        'id': to_do.id,
-        'state': to_do.state,
-        'title': to_do.title,
-    }]
+    assert response.json()["to_dos"] == [
+        {
+            "created_at": time[0].isoformat(),
+            "updated_at": time[1].isoformat(),
+            "description": to_do.description,
+            "id": to_do.id,
+            "state": to_do.state,
+            "title": to_do.title,
+        }
+    ]
 
 
 @pytest.mark.asyncio
 async def test_list_todos_filter_min_length(client, token):
-    tiny_string = 'a'
+    tiny_string = "a"
     response = await client.get(
-        f'/to_dos/?title={tiny_string}',
-        headers={'Authorization': f'Bearer {token}'},
+        f"/to_dos/?title={tiny_string}",
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
@@ -170,10 +171,10 @@ async def test_list_todos_filter_min_length(client, token):
 
 @pytest.mark.asyncio
 async def test_list_todos_filter_max_length(client, token):
-    large_string = 'a' * 22
+    large_string = "a" * 22
     response = await client.get(
-        f'/to_dos/?title={large_string}',
-        headers={'Authorization': f'Bearer {token}'},
+        f"/to_dos/?title={large_string}",
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

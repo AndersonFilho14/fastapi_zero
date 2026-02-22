@@ -37,7 +37,7 @@ async def test_read_users(client, user, token):
 async def test_read_user(client, user):
     from fastapi_zero.schemas import UserPublic
 
-    response = await client.get("/users/1")
+    response = await client.get(f"/users/{user.id}")
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == UserPublic.model_validate(user).model_dump()
@@ -57,7 +57,7 @@ async def test_update_user(client, user, token):
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        "id": 1,
+        "id": user.id,
         "username": "mock_update",
         "email": "mock_update@example.com",
     }
