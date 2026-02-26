@@ -73,7 +73,6 @@ async def test_list_todos_should_return_5_to_dos(session, client, user, token):
 
 @pytest.mark.asyncio
 async def test_list_todos_pagination_should_return_2_to_dos(session, user, client, token) -> None:
-
     expected_to_dos = 2
     session.add_all(ToDoFactory.create_batch(5, user_id=user.id))
     await session.commit()
@@ -190,7 +189,6 @@ async def test_delete_to_do_error(client, token):
 
 @pytest.mark.asyncio
 async def test_delete_to_do_success(session, user, client, token):
-
     to_do = ToDoFactory.create(user_id=user.id)
     session.add(to_do)
     await session.commit()

@@ -16,7 +16,6 @@ from fastapi_zero.security import get_password_hash
 from fastapi_zero.models import User, table_registry
 
 
-
 @pytest_asyncio.fixture
 async def client(session):
     async def get_session_override():
@@ -37,7 +36,6 @@ def engine():
 
 @pytest_asyncio.fixture
 async def session(engine: AsyncEngine):
-
     async with engine.begin() as conn:
         await conn.run_sync(table_registry.metadata.create_all)
 
