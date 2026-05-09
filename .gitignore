@@ -1,0 +1,8 @@
+.env
+compose.yaml
+Dockerfile
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
