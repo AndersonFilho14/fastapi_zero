@@ -17,8 +17,9 @@ A aplicação consiste em uma API para gerenciamento de usuários e tarefas (To-
 
 - **[FastAPI](https://fastapi.tiangolo.com/):** Framework web principal para a construção da API.
 - **[SQLAlchemy](https://www.sqlalchemy.org/):** ORM utilizado para o controle e consultas ao banco de dados de forma assíncrona.
-- **[Poetry](https://python-poetry.org/):** Gerenciador de dependências e ambientes virtuais.
+- **[uv](https://docs.astral.sh/uv/):** Gerenciador de pacotes e projetos extremamente rápido, utilizado para gerenciar dependências e o ambiente virtual.
 - **[Pytest](https://docs.pytest.org/) & Coverage:** Ferramentas para testes das rotas/consultas e validação da cobertura de testes.
+- **[Testcontainers](https://testcontainers.com/):** Usado para subir instâncias de banco de dados (PostgreSQL) isoladas via Docker durante a execução dos testes.
 
 ## 🔍 Exemplo de Código
 
@@ -59,31 +60,28 @@ async def create_user(user: UserSchema, session: AsyncSession = Depends(get_sess
 
 ## ⚙️ Como executar o projeto
 
-Certifique-se de ter o **Poetry** instalado na sua máquina.
+Certifique-se de ter o **[uv](https://docs.astral.sh/uv/)** instalado na sua máquina.
 
 **1. Clone o repositório:**
 ```bash
 git clone https://github.com/AndersonFilho14/fastapi_zero.git
-cd <NOME-DA-PASTA>
+cd fastapi_zero
 ```
 
-**2. Instale as dependências:**
+**2. Sincronize as dependências e o ambiente virtual:**
 ```bash
-poetry install
+uv sync
 ```
 
-**3. Ative o ambiente virtual:**
+**3. Rode os testes (opcional):**
+*(Nota: Certifique-se de ter o Docker/Docker Desktop rodando, pois os testes utilizam Testcontainers).*
 ```bash
-poetry shell
+uv run task test
 ```
 
-**4. Rode os testes (opcional):**
+**4. Inicie a aplicação:**
 ```bash
-pytest --cov
+uv run task run
 ```
 
-**5. Inicie a aplicação:**
-```bash
-uvicorn main:app --reload
-```
-> **Nota:** Acesse a documentação interativa (Swagger UI) gerada automaticamente pelo FastAPI em: `http://127.0.0.1:8000/docs`
+> **Nota:** A aplicação foi configurada para exibir a documentação interativa (Swagger UI) gerada automaticamente pelo FastAPI na rota principal. Acesse em: `http://127.0.0.1:8000/`
