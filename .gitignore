@@ -6,3 +6,6 @@ Dockerfile
 __pycache__/
 *.py[cod]
 *$py.class
+
+htmlcov/
+.coverage
